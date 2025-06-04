@@ -18,8 +18,13 @@ jupyter-lab *args:
 
 # mount the data directory on the ZCU here
 mount zcu="zcu":
-    sshfs {{ zcu }}:pflib/data pflib/data
+    sshfs -d \
+      -o reconnect \
+      -o ServerAliveInterval=15 \
+      -C \
+      {{ zcu }}:pflib/data pflib/data
 
 # unmount the data directory on the ZCU
 unmount:
     fusermount -u pflib/data
+
