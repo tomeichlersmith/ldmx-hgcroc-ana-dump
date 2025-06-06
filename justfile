@@ -9,19 +9,23 @@ init-ana:
     . venv/bin/activate
     pip install -r requirements.txt
 
-# open jupyter lab
-jupyter-lab *args:
+# run a command in the python venv
+python *command:
     #!/bin/bash
     set -euo pipefail
     . venv/bin/activate
-    jupyter lab {{ args }}
+    {{ command }}
+
+# open jupyter lab
+jupyter-lab *args: (python "jupyter" "lab" args)
 
 # mount the data directory on the ZCU here
 mount zcu="zcu":
-    sshfs -d \
+    sshfs \
+      --debug \
       -o reconnect \
       -o ServerAliveInterval=15 \
-      -C \
+      -o compression=yes \
       {{ zcu }}:pflib/data pflib/data
 
 # unmount the data directory on the ZCU
