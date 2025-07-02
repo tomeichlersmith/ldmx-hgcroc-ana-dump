@@ -204,9 +204,40 @@ static void my_command(Target* tgt) {
   // post-run cleanup
 }
 ```
+You can also use doxygen style comments (`/** ... */` or `///`) in the function
+body and those notes will be included in the online documentation.
 ]
 
 == Test HGCROC Parameters
+- The `ROC::TestParameters` class applies a set of parameters to the chip and then *unsets them when it is destroyed*
+- i.e. the `ROC::TestParameters` object must be *in scope* with the `tgt->daq_run` you wish for them to be applied to
+  (do folks know what I mean by in scope?)
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 0.5em,
+  [
+    Build up with test parameter builder.
+    - The `ROC::TestParameters` is not created until `apply`
+    ```cpp
+    auto test_param_handle =
+      roc.testParameters()
+      .add("PAGE", "PARAM1", 42)
+      // .. more .add( )s
+      .apply();
+    ```
+  ],
+  [
+    Apply already created `std::map`
+    - Helpful if parameter map is used for something else
+    ```cpp
+    auto test_param_handle =
+      ROC::TestParameters(
+        roc,
+        parameters_to_apply
+      );
+    ```
+  ]
+)
 
 == Defining a Writer
 
