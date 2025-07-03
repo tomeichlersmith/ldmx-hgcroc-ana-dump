@@ -315,6 +315,119 @@ The `pflib::packing::SingleROCEventPacket` holds
 *all* of the data from the chip. \
 Decodes `DAQ_FORMAT_SIMPLEROC`, other formats not supported at this time
 
+== Simple Example
+Definition of `all_channels_to_csv`
+```cpp
+[](std::ofstream& f) {
+  f << std::boolalpha;
+  f << packing::SingleROCEventPacket::to_csv_header << '\n';
+},
+[](std::ofstream& f, const pflib::packing::SingleROCEventPacket& ep) {
+  ep.to_csv(f);
+}
+```
+- no capturing needed (so no `&` in `[]`)
+- dumps all of the DAQ link data
+- one row per channel per event
+
+== Select ADC
+```cpp
+int param{0}; // somewhere above writer definition
+// writer definition
+[](std::ofstream& f) {
+  f << 'param';
+  for (int ch{0}; ch < 72; ch++) { f << ',' << ch; }
+  f << '\n';
+},
+[&](std::ofstream& f, const pflib::packing::SingleROCEventPacket& ep) {
+  f << param;
+  for (int ch{0}; ch < 72; ch++) { f << ',' << ep.channel(ch).adc(); }
+  f << '\n';
+}
+```
+#align(center)[All channels in their own columns, only keep ADC data]
+
+== Select Specific Channel
+```cpp
+int channel{0}; // somewhere above writer definition
+// writer definition
+[&](std::ofstream& f) {
+  boost::json::object h;
+  h["channel"] = channel;
+  f << "# " << boost::json::serialize(h) << '\n';
+  f << pflib::packing::Sample::to_csv_header << '\n';
+},
+[&](std::ofstream& f, const pflib::packing::SingleROCEventPacket& ep) {
+  ep.channel(channel).to_csv(f);
+  f << '\n';
+}
+```
+#align(center)[Save all the data from a specific channel (ADC, TOT, ADCt-1, and flags)]
+
+== Boost.JSON
+The `boost::json` objects in the header functions are helpful for writing extra
+data into the first line of the CSV.
+- Command/configuration details
+- Parameters that were applied during the whole run (would be constant for a whole column)
+- Helpful for sharing run labels with downstream Python plotting scripts
+
+= Python
+
+== The Basics
+#slide[
+  ```python
+  def f(x, y):
+    """documentation string
+
+    put it under the def or class
+    so it is attached automatically
+    the leading space is trimmed
+    """
+    return x+y
+  ```
+  *Docstrings* are the preferred documentation method
+  in the Python ecosystem.
+
+  Can still use `#` comments, but are not interpreted
+  by Python.
+][
+  - A *module* is just a Python file that defines functions/classes
+  - We can *import* modules to use the code in other modules or in our scripts
+
+  #alert[For our purposes, a script should not be used as a module.]
+  ```python
+  import mymodule
+  # mymodule is a module
+  # access code from it using `.`
+  mymodule.f()
+  # runs f from mymodule
+  ```
+]
+
+== `pflib/ana`
+#slide[
+#tblock(title: [For Now])[
+  Right now, this directory is just a temporary dumping ground to share Python scripts.
+]
+Still can share code with modules
+- see `pflib/ana/charge/update_path.py` for allowing a script to see the modules in `pflib/ana`
+- after `import update_path` (or copying its code), you can then `import` modules
+][
+  === Future...
+  I'm not sure! \
+  There are a lot of options
+  + Single Entry
+    - can be slow to run commands \
+      (entire module loaded every time)
+    - maybe easier to use?
+  + Module Share and Many Script
+    - need to define how to package it \
+      (hard)
+    - can be faster \
+      (scripts pick imports)
+    - more complicated to use?
+]
+
 #show: appendix
 = Questions
 
