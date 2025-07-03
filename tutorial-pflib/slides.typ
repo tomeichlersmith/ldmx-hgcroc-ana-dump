@@ -1,5 +1,6 @@
 #import "@local/umn-theme:0.0.0": *
 #import "@preview/codly:1.3.0": *
+#import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
 
 #show: codly-init
 
@@ -240,5 +241,93 @@ body and those notes will be included in the online documentation.
 )
 
 == Defining a Writer
+#grid(
+  columns: (1fr, 1fr),
+  [
+    - A lot of different ways to consume the data that is collected
+    - Most/Many will start with `DecodeAndWriteToCSV`
+    - Important to remember there are these other access points for
+      - Caching data and only writing out summary statistics
+      - Updating parameters instead of writing out data
+      - Forwarding data along over the wire
+  ],
+  {
+    set text(size: 0.8em)
+    diagram(
+      node-stroke: 1pt,
+      node-corner-radius: 5pt,
+      node(
+        (0,0),
+        [
+          `DAQConsumer`
+          #text(fill: umn-sunny)[ABC] \
+          `void consume(/*data*/)`
+        ]
+      ),
+      edge((0,0),(-0.5,1), "-|>"),
+      node(
+        (-0.5,1),
+        [
+          `WriteToBinaryFile` \
+          #text(fill: umn-sunny)[Concrete]
+        ]
+      ),
+      edge((0,0),(0.5,1), "-|>"),
+      node(
+        (0.5,1),
+        [
+          `DecodeAndWrite`
+          #text(fill: umn-sunny)[ABC] \
+          `void write_event(/*data*/)`
+        ]
+      ),
+      edge("-|>"),
+      node(
+        (0.5,2),
+        [
+          `DecodeAndWriteToCSV`
+          #text(fill: umn-sunny)[Concrete] \
+          Use Lambdas to define what \
+          and how to write rows
+        ]
+      )
+    )
+  }
+)
+#v(1fr)
+#align(center)[Let's look at `DecodeAndWriteToCSV` in more detail.]
 
+== DecodeAndWriteToCSV Outline
+```cpp
+pflib::DecodeAndWriteToCSV writer{
+  fname, // file to write to
+  [](std::ofstream& f) {
+    // define how header should be written
+    // called once
+  },
+  [](std::ofstream& f, const pflib::packing::SingleROCEventPacket& ep) {
+    // define how rows should be written
+    // called on every event collected during daq_run
+  }
+};
+```
+The `pflib::packing::SingleROCEventPacket` holds
+*all* of the data from the chip. \
+Decodes `DAQ_FORMAT_SIMPLEROC`, other formats not supported at this time
 
+#show: appendix
+= Questions
+
+== In Scope
+```cpp
+void f() {
+  // a is in scope
+  int a;
+  for (int i{0}; i < 2; i++) {
+    // a and b are in scope
+    int b;
+  } // b is destructed when it goes out of scope here
+  // a is in scope
+}
+```
+Overly simplistic, but just think about curly braces.
