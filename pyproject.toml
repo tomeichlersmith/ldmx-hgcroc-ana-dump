@@ -1,0 +1,10 @@
+[project]
+name = "hgcroc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyterlab>=4.4.3",
+    "scikit-hep>=2025.4.1",
+]
