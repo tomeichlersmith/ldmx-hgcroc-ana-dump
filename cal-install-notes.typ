@@ -1,4 +1,5 @@
 #import "@preview/codly:1.3.0": *
+#import "@preview/wrap-it:0.1.1": wrap-content
 
 #show: codly-init
 #show link: it => if type(it.dest) == str {
@@ -139,8 +140,20 @@ We are able to power cycle the Ecal remotely, so the biggest concern is just get
 ]
 
 == Powering
+#wrap-content(
+  figure(
+    caption: [
+      DC/DC boards and breakout stack assembled on Nov 24, 2025.
+    ],
+    image(width: 60%, "dcdc-stack.jpg")
+  )
+)[
 With the Ecal LV connected to the MPOD, we are able to control it remotely using net-snmp and a python script that Matt Gignac and I have developed. #link("https://github.com/tomeichlersmith/mpod_control/")[tomeichlersmith/mpod_control]
 I've already done the setup on the SLAC DAQ server, so you just need to `git clone` this repository to access the `mpod_control.py` file.
+
+- Double (triple) check that the two 3.3V cables are connected to the bottom (3.3V) DC/DC board and the rest 1.5V/1.8V cables are connected _not_ to the bottom DC/DC board.
+- If multimeter is on hand, someone (e.g. me) could power on the Ecal LV lines from the MPOD and you can double check that they are getting to the DC/DC output pins. I did this check last week, so we can skip it if there isn't time.
+]
 
 We have not even connected the Ecal HV lines to the modules. I believe it is feasible to partially disassemble the Ecal in order to connect the HV lines, but I also think we can get plenty out of this beam test without the HV connected. *Tamas -- I am leaving it up to you to decide.*
 If you have time to connect the HV line and run it to the MPOD, then go for it. My priority is just being able to talk to the Ecal (or at least one Ecal layer) so we can exercise our DAQ infrastructure.
