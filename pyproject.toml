@@ -8,8 +8,3 @@ dependencies = [
     "jupyterlab>=4.4.3",
     "scikit-hep>=2025.4.1",
 ]
-
-[tool.uv.workspace]
-members = [
-    "pflib",
-]
